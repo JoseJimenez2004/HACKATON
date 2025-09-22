@@ -54,8 +54,7 @@ function renderLandingPage() {
         <header>
             <nav>
                 <div class="logo">
-                    <div class="logo-icon">💸</div>
-                    <h1>Finanzas para Todos</h1>
+                    <h1>💸 RemesApp</h1>
                 </div>
                 <div class="nav-links">
                     <a href="#inicio" onclick="navigateTo('landing')">Inicio</a>
@@ -72,8 +71,8 @@ function renderLandingPage() {
             <!-- Hero Section -->
             <section id="hero">
                 <div class="hero-content">
-                    <h2>Banca Digital Sin Comisiones Para Todos</h2>
-                    <p>Envía y recibe remesas de forma instantánea, segura y sin costos ocultos. Tu dinero llega más rápido y completo.</p>
+                    <h2>Envía Remesas Sin Comisiones</h2>
+                    <p>Transferencias instantáneas y transparentes usando tecnología Open Payments</p>
                     <div class="hero-buttons">
                         <button class="btn-primary" onclick="navigateTo('register')">Abrir Mi Cuenta</button>
                         <button class="btn-secondary">Ver Demo</button>
@@ -130,16 +129,6 @@ function renderLandingPage() {
                             <h3>Control Total</h3>
                             <p>Gestiona tus finanzas con herramientas intuitivas y reportes detallados en tiempo real.</p>
                         </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">💬</div>
-                            <h3>Soporte 24/7</h3>
-                            <p>Nuestro equipo de soporte está siempre disponible para ayudarte en tu idioma.</p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">🎯</div>
-                            <h3>Sin Sorpresas</h3>
-                            <p>Precios transparentes sin costos ocultos. Sabes exactamente lo que pagas desde el inicio.</p>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -149,7 +138,7 @@ function renderLandingPage() {
                 <div style="max-width: 600px; margin: 0 auto;">
                     <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">¿Listo para comenzar?</h2>
                     <p style="font-size: 1.2rem; margin-bottom: 2rem; opacity: 0.9;">
-                        Únete a miles de usuarios que ya están disfrutando de las finanzas sin complicaciones.
+                        Únete a miles de usuarios que ya están disfrutando de las remesas sin complicaciones.
                     </p>
                     <button class="btn-primary" onclick="navigateTo('register')" style="font-size: 1.2rem; padding: 1.2rem 3rem;">
                         Crear Cuenta Gratis
@@ -162,8 +151,8 @@ function renderLandingPage() {
             <div style="max-width: 1200px; margin: 0 auto;">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 2rem; text-align: left;">
                     <div>
-                        <h3 style="color: #10b981; margin-bottom: 1rem;">Finanzas para Todos</h3>
-                        <p>Haciendo las finanzas accesibles para todos, sin barreras ni comisiones ocultas.</p>
+                        <h3 style="color: #10b981; margin-bottom: 1rem;">RemesApp</h3>
+                        <p>Haciendo las remesas accesibles para todos, sin barreras ni comisiones ocultas.</p>
                     </div>
                     <div>
                         <h4>Enlaces Rápidos</h4>
@@ -179,7 +168,7 @@ function renderLandingPage() {
                     </div>
                 </div>
                 <p style="border-top: 1px solid #374151; padding-top: 2rem; opacity: 0.7;">
-                    &copy; 2024 Finanzas para Todos. Todos los derechos reservados.
+                    &copy; 2024 RemesApp. Todos los derechos reservados.
                 </p>
             </div>
         </footer>
@@ -192,8 +181,7 @@ function renderLoginPage() {
         <header>
             <nav>
                 <div class="logo">
-                    <div class="logo-icon">💸</div>
-                    <h1>Finanzas para Todos</h1>
+                    <h1>💸 RemesApp</h1>
                 </div>
                 <div class="nav-links">
                     <button class="btn-register" onclick="navigateTo('register')">Crear Cuenta</button>
@@ -204,7 +192,7 @@ function renderLoginPage() {
         <main style="background: linear-gradient(135deg, #f0fdf4, #ecfdf5); min-height: 100vh; padding: 2rem;">
             <div class="form-container">
                 <h2>Bienvenido de Nuevo</h2>
-                <p style="text-align: center; color: #6b7280; margin-bottom: 2rem;">Ingresa a tu cuenta para gestionar tus finanzas</p>
+                <p style="text-align: center; color: #6b7280; margin-bottom: 2rem;">Ingresa a tu cuenta para gestionar tus remesas</p>
                 
                 <form id="loginForm">
                     <div class="form-group">
@@ -227,13 +215,6 @@ function renderLoginPage() {
                 <div class="form-footer">
                     <p>¿No tienes cuenta? <a href="#" onclick="navigateTo('register')">Regístrate gratis</a></p>
                 </div>
-                
-                <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e5e7eb;">
-                    <p style="color: #6b7280; margin-bottom: 1rem;">O continúa con</p>
-                    <button style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 10px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                        <span>📱</span> Google
-                    </button>
-                </div>
             </div>
         </main>
     `;
@@ -245,8 +226,7 @@ function renderRegisterPage() {
         <header>
             <nav>
                 <div class="logo">
-                    <div class="logo-icon">💸</div>
-                    <h1>Finanzas para Todos</h1>
+                    <h1>💸 RemesApp</h1>
                 </div>
                 <div class="nav-links">
                     <button class="btn-login" onclick="navigateTo('login')">Iniciar Sesión</button>
@@ -256,7 +236,7 @@ function renderRegisterPage() {
 
         <main style="background: linear-gradient(135deg, #f0fdf4, #ecfdf5); min-height: 100vh; padding: 2rem;">
             <div class="form-container">
-                <h2>Comienza Tu Viaje Financiero</h2>
+                <h2>Comienza Tu Viaje con RemesApp</h2>
                 <p style="text-align: center; color: #6b7280; margin-bottom: 2rem;">Crea tu cuenta en menos de 2 minutos</p>
                 
                 <form id="registerForm">
@@ -300,16 +280,13 @@ function renderRegisterPage() {
     `;
 }
 
-// [Mantén las demás funciones igual pero actualiza los textos a "Finanzas para Todos"]
-
 // Dashboard Mejorado
 function renderDashboard() {
     return `
         <header>
             <nav>
                 <div class="logo">
-                    <div class="logo-icon">💸</div>
-                    <h1>Finanzas para Todos</h1>
+                    <h1>💸 RemesApp</h1>
                 </div>
                 <div class="nav-links">
                     <span style="color: #10b981; font-weight: 600;">¡Hola, ${AppState.userData.name}!</span>
@@ -321,7 +298,7 @@ function renderDashboard() {
         <main class="dashboard">
             <div class="welcome-section">
                 <h1>¡Bienvenido a tu Dashboard!</h1>
-                <p>Gestiona tus finanzas de manera simple y eficiente</p>
+                <p>Gestiona tus remesas de manera simple y eficiente</p>
             </div>
 
             <div class="balance-card">
@@ -333,11 +310,11 @@ function renderDashboard() {
             <div class="action-buttons">
                 <button class="btn-send" onclick="navigateTo('send')">
                     <span style="font-size: 2rem;">💸</span>
-                    Enviar Dinero
+                    Enviar Remesa
                 </button>
                 <button class="btn-receive" onclick="receivePayment()">
                     <span style="font-size: 2rem;">💰</span>
-                    Recibir Pago
+                    Recibir Remesa
                 </button>
                 <button class="btn-history" onclick="navigateTo('history')">
                     <span style="font-size: 2rem;">📊</span>
@@ -358,7 +335,75 @@ function renderDashboard() {
     `;
 }
 
-// [Mantén el resto del código JavaScript igual...]
+// Página de Envío
+function renderSendPage() {
+    return `
+        <header>
+            <nav>
+                <div class="logo">
+                    <h1>💸 RemesApp</h1>
+                </div>
+                <div class="nav-links">
+                    <button class="btn-login" onclick="navigateTo('dashboard')">← Volver al Dashboard</button>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <div class="form-container">
+                <h2>Enviar Remesa</h2>
+                <form id="sendForm">
+                    <div class="form-group">
+                        <label for="recipient">Destinatario (Payment Pointer)</label>
+                        <input type="text" id="recipient" placeholder="$wallet.example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Monto</label>
+                        <input type="number" id="amount" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="currency">Moneda</label>
+                        <select id="currency" required>
+                            <option value="USD">USD - Dólar Americano</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="MXN">MXN - Peso Mexicano</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="memo">Concepto</label>
+                        <input type="text" id="memo" placeholder="Ej: Apoyo familiar">
+                    </div>
+                    <button type="submit" class="btn-submit">Enviar Remesa</button>
+                </form>
+            </div>
+        </main>
+    `;
+}
+
+// Página de Historial
+function renderHistoryPage() {
+    return `
+        <header>
+            <nav>
+                <div class="logo">
+                    <h1>💸 RemesApp</h1>
+                </div>
+                <div class="nav-links">
+                    <button class="btn-login" onclick="navigateTo('dashboard')">← Volver al Dashboard</button>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <div style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+                <h2>Historial de Transacciones</h2>
+                <div style="background: white; border-radius: 10px; padding: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <p style="text-align: center; color: #64748b;">No hay transacciones en tu historial</p>
+                </div>
+            </div>
+        </main>
+    `;
+}
 
 // Agregar event listeners mejorados
 function addEventListeners() {
@@ -445,6 +490,18 @@ function handleRegister(e) {
     }, 1500);
 }
 
+function handleSend(e) {
+    e.preventDefault();
+    const amount = document.getElementById('amount').value;
+    const recipient = document.getElementById('recipient').value;
+    
+    showNotification(`Remesa de $${amount} enviada exitosamente a ${recipient}`, 'success');
+    
+    setTimeout(() => {
+        navigateTo('dashboard');
+    }, 2000);
+}
+
 function showNotification(message, type = 'info') {
     // Crear notificación
     const notification = document.createElement('div');
@@ -478,7 +535,18 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// [Mantén el resto de las funciones...]
+function logout() {
+    AppState.currentUser = null;
+    showNotification('Sesión cerrada exitosamente', 'info');
+    setTimeout(() => {
+        navigateTo('landing');
+    }, 1000);
+}
+
+function receivePayment() {
+    const paymentPointer = '$remesapp.example/usuario';
+    prompt('Comparte tu Payment Pointer con el remitente:', paymentPointer);
+}
 
 // Inicializar la aplicación
 document.addEventListener('DOMContentLoaded', function() {
