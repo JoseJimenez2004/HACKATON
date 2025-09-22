@@ -2,9 +2,10 @@
   "name": "remesas-frontend",
   "version": "1.0.0",
   "scripts": {
-    "dev": "live-server --port=3000",
-    "build-css": "sass src/styles:public/css --watch",
-    "start": "npm run build-css & npm run dev"
+    "dev": "live-server public --port=3000",
+    "build-css": "sass src/styles/main.scss public/css/main.css",
+    "watch-css": "sass --watch src/styles:public/css",
+    "start": "npm run build-css && npm run dev"
   },
   "devDependencies": {
     "live-server": "^1.2.2",
