@@ -1,72 +1,238 @@
-// Estado global de la aplicación
+// Estado global mejorado de la aplicación
 const AppState = {
     currentUser: null,
     currentPage: 'landing',
+    currentProfileTab: 'personal',
     transactions: [],
+    notifications: [],
     userData: {
-        name: 'Usuario',
+        name: 'María González',
+        email: 'maria@ejemplo.com',
+        phone: '+1 234 567 8900',
         balance: 1250.00,
-        currency: 'USD'
+        currency: 'USD',
+        joinedDate: '2024-01-15',
+        avatar: 'MG',
+        paymentPointer: '$finanzasparatodos.com/maria'
+    },
+    tempData: {
+        loginAttempts: 0,
+        lastLogin: null
     }
 };
 
-// Navegación entre páginas
-function navigateTo(page) {
-    AppState.currentPage = page;
-    renderPage();
-    window.scrollTo(0, 0);
+// Sistema de notificaciones
+class NotificationSystem {
+    static show(message, type = 'info', duration = 5000) {
+        const id = Date.now().toString();
+        const notification = {
+            id,
+            message,
+            type,
+            duration,
+            timestamp: new Date()
+        };
+        
+        AppState.notifications.push(notification);
+        this.render();
+        
+        if (duration > 0) {
+            setTimeout(() => {
+                this.remove(id);
+            }, duration);
+        }
+        
+        return id;
+    }
+    
+    static remove(id) {
+        AppState.notifications = AppState.notifications.filter(n => n.id !== id);
+        this.render();
+    }
+    
+    static clear() {
+        AppState.notifications = [];
+        this.render();
+    }
+    
+    static render() {
+        const container = document.getElementById('notification-container');
+        if (!container) return;
+        
+        container.innerHTML = AppState.notifications.map(notification => `
+            <div class="notification ${notification.type}">
+                <div class="notification-header">
+                    <h4>${this.getTitle(notification.type)}</h4>
+                    <button class="close-btn" onclick="NotificationSystem.remove('${notification.id}')">×</button>
+                </div>
+                <div class="notification-body">${notification.message}</div>
+            </div>
+        `).join('');
+    }
+    
+    static getTitle(type) {
+        const titles = {
+            success: '✅ Éxito',
+            error: '❌ Error',
+            warning: '⚠️ Advertencia',
+            info: 'ℹ️ Información'
+        };
+        return titles[type] || titles.info;
+    }
 }
 
-// Renderizar página actual
+// Sistema de validaciones
+class ValidationSystem {
+    static validateEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    }
+    
+    static validatePassword(password) {
+        const strengths = {
+            weak: password.length >= 6,
+            medium: password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password),
+            strong: password.length >= 10 && /[A-Z]/.test(password) && /[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password)
+        };
+        
+        if (strengths.strong) return 'strong';
+        if (strengths.medium) return 'medium';
+        if (strengths.weak) return 'weak';
+        return 'invalid';
+    }
+    
+    static validatePhone(phone) {
+        const regex = /^\+?[\d\s\-\(\)]{10,}$/;
+        return regex.test(phone);
+    }
+    
+    static validateAmount(amount) {
+        return !isNaN(amount) && amount > 0 && amount <= 10000;
+    }
+    
+    static validatePaymentPointer(pointer) {
+        return pointer.startsWith('$') && pointer.includes('.');
+    }
+}
+
+// Navegación mejorada entre páginas
+function navigateTo(page, params = {}) {
+    AppState.currentPage = page;
+    if (params.tab) AppState.currentProfileTab = params.tab;
+    
+    renderPage();
+    window.scrollTo(0, 0);
+    
+    // Agregar al historial del navegador
+    history.pushState({ page, params }, '', `#${page}`);
+}
+
+// Renderizar página actual mejorado
 function renderPage() {
     const app = document.getElementById('app');
+    if (!app) return;
+    
+    let pageHTML = '';
     
     switch (AppState.currentPage) {
         case 'landing':
-            app.innerHTML = renderLandingPage();
+            pageHTML = renderLandingPage();
             break;
         case 'login':
-            app.innerHTML = renderLoginPage();
+            pageHTML = renderLoginPage();
             break;
         case 'register':
-            app.innerHTML = renderRegisterPage();
+            pageHTML = renderRegisterPage();
             break;
         case 'dashboard':
-            app.innerHTML = renderDashboard();
+            pageHTML = renderDashboard();
             break;
         case 'send':
-            app.innerHTML = renderSendPage();
+            pageHTML = renderSendPage();
+            break;
+        case 'receive':
+            pageHTML = renderReceivePage();
             break;
         case 'history':
-            app.innerHTML = renderHistoryPage();
+            pageHTML = renderHistoryPage();
+            break;
+        case 'profile':
+            pageHTML = renderProfilePage();
+            break;
+        case 'settings':
+            pageHTML = renderSettingsPage();
+            break;
+        case 'help':
+            pageHTML = renderHelpPage();
             break;
         default:
-            app.innerHTML = renderLandingPage();
+            pageHTML = renderLandingPage();
     }
     
+    app.innerHTML = `
+        ${renderHeader()}
+        ${pageHTML}
+        ${renderNotificationContainer()}
+    `;
+    
     // Agregar event listeners después de renderizar
-    setTimeout(addEventListeners, 100);
+    setTimeout(() => {
+        addEventListeners();
+        setupAnimations();
+        setupRealTimeValidation();
+    }, 100);
+}
+
+// Header dinámico
+function renderHeader() {
+    const isLoggedIn = AppState.currentUser !== null;
+    
+    return `
+        <header id="main-header">
+            <nav>
+                <div class="logo" onclick="navigateTo('landing')" style="cursor: pointer;">
+                    <div class="logo-icon">💸</div>
+                    <h1>RemesApp</h1>
+                </div>
+                <div class="nav-links">
+                    ${isLoggedIn ? renderUserMenu() : renderGuestMenu()}
+                </div>
+            </nav>
+        </header>
+    `;
+}
+
+function renderUserMenu() {
+    return `
+        <div class="user-menu">
+            <a href="#" onclick="navigateTo('dashboard')">Dashboard</a>
+            <a href="#" onclick="navigateTo('history')">Historial</a>
+            <a href="#" onclick="navigateTo('help')">Ayuda</a>
+            <div class="user-avatar" onclick="navigateTo('profile')">
+                ${AppState.userData.avatar}
+            </div>
+        </div>
+    `;
+}
+
+function renderGuestMenu() {
+    return `
+        <a href="#features" onclick="scrollToSection('features')">Características</a>
+        <a href="#como-funciona" onclick="scrollToSection('como-funciona')">Cómo Funciona</a>
+        <a href="#testimonios" onclick="scrollToSection('testimonios')">Testimonios</a>
+        <button class="btn-login" onclick="navigateTo('login')">Iniciar Sesión</button>
+        <button class="btn-register" onclick="navigateTo('register')">Comenzar Gratis</button>
+    `;
+}
+
+// Contenedor de notificaciones
+function renderNotificationContainer() {
+    return `<div id="notification-container" class="notification-container"></div>`;
 }
 
 // Página de Inicio Mejorada
 function renderLandingPage() {
     return `
-        <header>
-            <nav>
-                <div class="logo">
-                    <h1>💸 RemesApp</h1>
-                </div>
-                <div class="nav-links">
-                    <a href="#inicio" onclick="navigateTo('landing')">Inicio</a>
-                    <a href="#caracteristicas">Características</a>
-                    <a href="#como-funciona">Cómo Funciona</a>
-                    <a href="#testimonios">Testimonios</a>
-                    <button class="btn-login" onclick="navigateTo('login')">Iniciar Sesión</button>
-                    <button class="btn-register" onclick="navigateTo('register')">Comenzar Gratis</button>
-                </div>
-            </nav>
-        </header>
-
         <main>
             <!-- Hero Section -->
             <section id="hero">
@@ -178,17 +344,6 @@ function renderLandingPage() {
 // Página de Login Mejorada
 function renderLoginPage() {
     return `
-        <header>
-            <nav>
-                <div class="logo">
-                    <h1>💸 RemesApp</h1>
-                </div>
-                <div class="nav-links">
-                    <button class="btn-register" onclick="navigateTo('register')">Crear Cuenta</button>
-                </div>
-            </nav>
-        </header>
-
         <main style="background: linear-gradient(135deg, #f0fdf4, #ecfdf5); min-height: 100vh; padding: 2rem;">
             <div class="form-container">
                 <h2>Bienvenido de Nuevo</h2>
@@ -205,7 +360,7 @@ function renderLoginPage() {
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                         <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                            <input type="checkbox"> Recordarme
+                            <input type="checkbox" id="rememberMe"> Recordarme
                         </label>
                         <a href="#" style="color: #10b981; text-decoration: none;">¿Olvidaste tu contraseña?</a>
                     </div>
@@ -223,17 +378,6 @@ function renderLoginPage() {
 // Página de Registro Mejorada
 function renderRegisterPage() {
     return `
-        <header>
-            <nav>
-                <div class="logo">
-                    <h1>💸 RemesApp</h1>
-                </div>
-                <div class="nav-links">
-                    <button class="btn-login" onclick="navigateTo('login')">Iniciar Sesión</button>
-                </div>
-            </nav>
-        </header>
-
         <main style="background: linear-gradient(135deg, #f0fdf4, #ecfdf5); min-height: 100vh; padding: 2rem;">
             <div class="form-container">
                 <h2>Comienza Tu Viaje con RemesApp</h2>
@@ -283,18 +427,6 @@ function renderRegisterPage() {
 // Dashboard Mejorado
 function renderDashboard() {
     return `
-        <header>
-            <nav>
-                <div class="logo">
-                    <h1>💸 RemesApp</h1>
-                </div>
-                <div class="nav-links">
-                    <span style="color: #10b981; font-weight: 600;">¡Hola, ${AppState.userData.name}!</span>
-                    <button class="btn-login" onclick="logout()">Cerrar Sesión</button>
-                </div>
-            </nav>
-        </header>
-
         <main class="dashboard">
             <div class="welcome-section">
                 <h1>¡Bienvenido a tu Dashboard!</h1>
@@ -312,7 +444,7 @@ function renderDashboard() {
                     <span style="font-size: 2rem;">💸</span>
                     Enviar Remesa
                 </button>
-                <button class="btn-receive" onclick="receivePayment()">
+                <button class="btn-receive" onclick="navigateTo('receive')">
                     <span style="font-size: 2rem;">💰</span>
                     Recibir Remesa
                 </button>
@@ -338,17 +470,6 @@ function renderDashboard() {
 // Página de Envío
 function renderSendPage() {
     return `
-        <header>
-            <nav>
-                <div class="logo">
-                    <h1>💸 RemesApp</h1>
-                </div>
-                <div class="nav-links">
-                    <button class="btn-login" onclick="navigateTo('dashboard')">← Volver al Dashboard</button>
-                </div>
-            </nav>
-        </header>
-
         <main>
             <div class="form-container">
                 <h2>Enviar Remesa</h2>
@@ -380,25 +501,288 @@ function renderSendPage() {
     `;
 }
 
+// Página de Recepción
+function renderReceivePage() {
+    return `
+        <main>
+            <div class="form-container">
+                <h2>Recibir Pago</h2>
+                <div class="payment-info">
+                    <h3>Tu Payment Pointer</h3>
+                    <div class="payment-pointer" onclick="copyToClipboard('${AppState.userData.paymentPointer}')">
+                        ${AppState.userData.paymentPointer}
+                        <span class="copy-icon">📋</span>
+                    </div>
+                    <p style="color: #6b7280; margin-top: 1rem;">
+                        Comparte este código con quien quiera enviarte dinero. Es tu dirección única para recibir pagos.
+                    </p>
+                </div>
+                
+                <div class="qr-code" style="text-align: center; margin: 2rem 0;">
+                    <div style="background: white; padding: 2rem; border-radius: 10px; display: inline-block;">
+                        <div style="width: 150px; height: 150px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                            <span style="font-size: 3rem;">💰</span>
+                        </div>
+                    </div>
+                    <p style="color: #6b7280; margin-top: 1rem;">Escanea este código QR para recibir pagos</p>
+                </div>
+            </div>
+        </main>
+    `;
+}
+
 // Página de Historial
 function renderHistoryPage() {
     return `
-        <header>
-            <nav>
-                <div class="logo">
-                    <h1>💸 RemesApp</h1>
-                </div>
-                <div class="nav-links">
-                    <button class="btn-login" onclick="navigateTo('dashboard')">← Volver al Dashboard</button>
-                </div>
-            </nav>
-        </header>
-
         <main>
             <div style="max-width: 800px; margin: 0 auto; padding: 2rem;">
                 <h2>Historial de Transacciones</h2>
                 <div style="background: white; border-radius: 10px; padding: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                     <p style="text-align: center; color: #64748b;">No hay transacciones en tu historial</p>
+                </div>
+            </div>
+        </main>
+    `;
+}
+
+// Página de Perfil Mejorada
+function renderProfilePage() {
+    return `
+        <main class="profile-page">
+            <div class="profile-header">
+                <div class="profile-avatar">${AppState.userData.avatar}</div>
+                <h1>${AppState.userData.name}</h1>
+                <p>Miembro desde ${new Date(AppState.userData.joinedDate).toLocaleDateString('es-ES')}</p>
+            </div>
+            
+            <div class="profile-grid">
+                <div class="profile-sidebar">
+                    <div class="sidebar-card">
+                        <h3>Mi Cuenta</h3>
+                        <div class="menu-item ${AppState.currentProfileTab === 'personal' ? 'active' : ''}" 
+                             onclick="navigateTo('profile', {tab: 'personal'})">
+                            👤 Información Personal
+                        </div>
+                        <div class="menu-item ${AppState.currentProfileTab === 'security' ? 'active' : ''}" 
+                             onclick="navigateTo('profile', {tab: 'security'})">
+                            🔒 Seguridad
+                        </div>
+                        <div class="menu-item ${AppState.currentProfileTab === 'preferences' ? 'active' : ''}" 
+                             onclick="navigateTo('profile', {tab: 'preferences'})">
+                            ⚙️ Preferencias
+                        </div>
+                        <div class="menu-item ${AppState.currentProfileTab === 'payment' ? 'active' : ''}" 
+                             onclick="navigateTo('profile', {tab: 'payment'})">
+                            💳 Métodos de Pago
+                        </div>
+                    </div>
+                    
+                    <div class="sidebar-card">
+                        <h3>Acciones Rápidas</h3>
+                        <div class="menu-item" onclick="navigateTo('send')">
+                            💸 Enviar Dinero
+                        </div>
+                        <div class="menu-item" onclick="navigateTo('receive')">
+                            💰 Recibir Pago
+                        </div>
+                        <div class="menu-item" onclick="navigateTo('history')">
+                            📊 Ver Historial
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-content">
+                    ${renderProfileContent()}
+                </div>
+            </div>
+        </main>
+    `;
+}
+
+function renderProfileContent() {
+    switch (AppState.currentProfileTab) {
+        case 'personal':
+            return renderPersonalInfo();
+        case 'security':
+            return renderSecuritySettings();
+        case 'preferences':
+            return renderPreferences();
+        case 'payment':
+            return renderPaymentMethods();
+        default:
+            return renderPersonalInfo();
+    }
+}
+
+function renderPersonalInfo() {
+    return `
+        <div class="content-card">
+            <h2>Información Personal</h2>
+            <form id="personalInfoForm">
+                <div class="form-group">
+                    <label for="profileName">Nombre Completo</label>
+                    <input type="text" id="profileName" value="${AppState.userData.name}" required>
+                </div>
+                <div class="form-group">
+                    <label for="profileEmail">Correo Electrónico</label>
+                    <input type="email" id="profileEmail" value="${AppState.userData.email}" required>
+                </div>
+                <div class="form-group">
+                    <label for="profilePhone">Teléfono</label>
+                    <input type="tel" id="profilePhone" value="${AppState.userData.phone}" required>
+                </div>
+                <div class="form-group">
+                    <label>Payment Pointer</label>
+                    <input type="text" value="${AppState.userData.paymentPointer}" readonly 
+                           style="background: #f3f4f6; cursor: not-allowed;">
+                    <small>Tu identificador único para recibir pagos</small>
+                </div>
+                <button type="submit" class="btn-submit">Guardar Cambios</button>
+            </form>
+        </div>
+    `;
+}
+
+function renderSecuritySettings() {
+    return `
+        <div class="content-card">
+            <h2>Configuración de Seguridad</h2>
+            
+            <div style="margin-bottom: 2rem;">
+                <h3>Cambiar Contraseña</h3>
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label for="currentPassword">Contraseña Actual</label>
+                        <input type="password" id="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">Nueva Contraseña</label>
+                        <input type="password" id="newPassword" required>
+                        <div class="password-strength">
+                            <div class="strength-bar" id="passwordStrengthBar"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmNewPassword">Confirmar Nueva Contraseña</label>
+                        <input type="password" id="confirmNewPassword" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Actualizar Contraseña</button>
+                </form>
+            </div>
+            
+            <div>
+                <h3>Autenticación de Dos Factores</h3>
+                <p style="color: #6b7280; margin-bottom: 1rem;">Protege tu cuenta con una capa adicional de seguridad.</p>
+                <button class="btn-submit" style="background: #3b82f6;">Activar 2FA</button>
+            </div>
+        </div>
+    `;
+}
+
+function renderPreferences() {
+    return `
+        <div class="content-card">
+            <h2>Preferencias</h2>
+            <form id="preferencesForm">
+                <div class="form-group">
+                    <label for="language">Idioma</label>
+                    <select id="language">
+                        <option value="es">Español</option>
+                        <option value="en">English</option>
+                        <option value="pt">Português</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="currencyPref">Moneda Predeterminada</label>
+                    <select id="currencyPref">
+                        <option value="USD">USD - Dólar Americano</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="MXN">MXN - Peso Mexicano</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="emailNotifications">
+                        Recibir notificaciones por email
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="smsNotifications">
+                        Recibir notificaciones por SMS
+                    </label>
+                </div>
+                <button type="submit" class="btn-submit">Guardar Preferencias</button>
+            </form>
+        </div>
+    `;
+}
+
+function renderPaymentMethods() {
+    return `
+        <div class="content-card">
+            <h2>Métodos de Pago</h2>
+            <div style="margin-bottom: 2rem;">
+                <h3>Tarjetas Vinculadas</h3>
+                <div class="payment-method">
+                    <div class="method-icon">💳</div>
+                    <div class="method-info">
+                        <strong>Visa •••• 1234</strong>
+                        <span>Expira 12/2025</span>
+                    </div>
+                    <button class="btn-remove">Eliminar</button>
+                </div>
+                <button class="btn-submit" style="background: #3b82f6; margin-top: 1rem;">+ Agregar Tarjeta</button>
+            </div>
+            
+            <div>
+                <h3>Cuentas Bancarias</h3>
+                <div class="payment-method">
+                    <div class="method-icon">🏦</div>
+                    <div class="method-info">
+                        <strong>Banco Nacional</strong>
+                        <span>•••• 5678</span>
+                    </div>
+                    <button class="btn-remove">Eliminar</button>
+                </div>
+                <button class="btn-submit" style="background: #3b82f6; margin-top: 1rem;">+ Agregar Cuenta</button>
+            </div>
+        </div>
+    `;
+}
+
+function renderSettingsPage() {
+    return `
+        <main>
+            <div style="max-width: 600px; margin: 0 auto; padding: 2rem;">
+                <h2>Configuración</h2>
+                <div style="background: white; border-radius: 10px; padding: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <p style="text-align: center; color: #64748b;">Página de configuración en desarrollo</p>
+                </div>
+            </div>
+        </main>
+    `;
+}
+
+function renderHelpPage() {
+    return `
+        <main>
+            <div style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+                <h2>Centro de Ayuda</h2>
+                <div style="background: white; border-radius: 10px; padding: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <h3>Preguntas Frecuentes</h3>
+                    <div class="faq-item">
+                        <h4>¿Cómo envío dinero?</h4>
+                        <p>Ve a la sección "Enviar Remesa" e ingresa los datos del destinatario.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4>¿Qué es un Payment Pointer?</h4>
+                        <p>Es tu dirección única para recibir pagos, similar a un email.</p>
+                    </div>
+                    <div class="contact-support">
+                        <h3>¿Necesitas más ayuda?</h3>
+                        <button class="btn-submit">Contactar Soporte</button>
+                    </div>
                 </div>
             </div>
         </main>
@@ -438,6 +822,17 @@ function addEventListeners() {
     if (sendForm) {
         sendForm.addEventListener('submit', handleSend);
     }
+
+    // Formularios del perfil
+    const personalInfoForm = document.getElementById('personalInfoForm');
+    if (personalInfoForm) {
+        personalInfoForm.addEventListener('submit', handlePersonalInfoUpdate);
+    }
+
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', handlePasswordChange);
+    }
 }
 
 // Manejadores de eventos mejorados
@@ -445,21 +840,49 @@ function handleLogin(e) {
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    const rememberMe = document.getElementById('rememberMe')?.checked;
     
-    // Validación básica
+    // Validaciones
     if (!email || !password) {
-        showNotification('Por favor completa todos los campos', 'error');
+        NotificationSystem.show('Por favor completa todos los campos', 'error');
         return;
     }
     
-    // Simular login exitoso
-    showNotification('¡Bienvenido de nuevo!', 'success');
-    AppState.currentUser = { email: email, name: email.split('@')[0] };
-    AppState.userData.name = email.split('@')[0];
+    if (!ValidationSystem.validateEmail(email)) {
+        NotificationSystem.show('Por favor ingresa un email válido', 'error');
+        return;
+    }
     
+    // Simular carga
+    const submitBtn = e.target.querySelector('.btn-submit');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<div class="loading-spinner"></div> Procesando...';
+    submitBtn.disabled = true;
+    
+    // Simular API call
     setTimeout(() => {
-        navigateTo('dashboard');
-    }, 1000);
+        if (password === 'password123') { // Contraseña de prueba
+            AppState.currentUser = { 
+                email: email, 
+                name: email.split('@')[0],
+                loginTime: new Date()
+            };
+            AppState.userData.name = email.split('@')[0];
+            AppState.userData.email = email;
+            AppState.userData.avatar = email.split('@')[0].substring(0, 2).toUpperCase();
+            
+            NotificationSystem.show('¡Bienvenido de nuevo!', 'success');
+            
+            setTimeout(() => {
+                navigateTo('dashboard');
+            }, 1000);
+        } else {
+            AppState.tempData.loginAttempts++;
+            NotificationSystem.show('Credenciales incorrectas. Intenta nuevamente.', 'error');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }, 1500);
 }
 
 function handleRegister(e) {
@@ -471,19 +894,26 @@ function handleRegister(e) {
     
     // Validaciones
     if (password !== confirmPassword) {
-        showNotification('Las contraseñas no coinciden', 'error');
+        NotificationSystem.show('Las contraseñas no coinciden', 'error');
         return;
     }
     
     if (password.length < 6) {
-        showNotification('La contraseña debe tener al menos 6 caracteres', 'error');
+        NotificationSystem.show('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+    }
+    
+    if (!ValidationSystem.validateEmail(email)) {
+        NotificationSystem.show('Por favor ingresa un email válido', 'error');
         return;
     }
     
     // Simular registro exitoso
-    showNotification('¡Cuenta creada exitosamente!', 'success');
+    NotificationSystem.show('¡Cuenta creada exitosamente!', 'success');
     AppState.currentUser = { email: email, name: fullName };
     AppState.userData.name = fullName;
+    AppState.userData.email = email;
+    AppState.userData.avatar = fullName.substring(0, 2).toUpperCase();
     
     setTimeout(() => {
         navigateTo('dashboard');
@@ -492,68 +922,150 @@ function handleRegister(e) {
 
 function handleSend(e) {
     e.preventDefault();
-    const amount = document.getElementById('amount').value;
+    const amount = parseFloat(document.getElementById('amount').value);
     const recipient = document.getElementById('recipient').value;
     
-    showNotification(`Remesa de $${amount} enviada exitosamente a ${recipient}`, 'success');
+    if (!ValidationSystem.validateAmount(amount)) {
+        NotificationSystem.show('El monto debe ser entre $0.01 y $10,000', 'error');
+        return;
+    }
+    
+    if (!ValidationSystem.validatePaymentPointer(recipient)) {
+        NotificationSystem.show('Payment Pointer inválido', 'error');
+        return;
+    }
+    
+    NotificationSystem.show(`Remesa de $${amount} enviada exitosamente a ${recipient}`, 'success');
     
     setTimeout(() => {
         navigateTo('dashboard');
     }, 2000);
 }
 
-function showNotification(message, type = 'info') {
-    // Crear notificación
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        padding: 1rem 1.5rem;
-        border-radius: 10px;
-        color: white;
-        font-weight: 600;
-        z-index: 10000;
-        animation: slideIn 0.3s ease;
-        max-width: 300px;
-    `;
+function handlePersonalInfoUpdate(e) {
+    e.preventDefault();
+    const name = document.getElementById('profileName').value;
+    const email = document.getElementById('profileEmail').value;
+    const phone = document.getElementById('profilePhone').value;
     
-    if (type === 'success') {
-        notification.style.background = '#10b981';
-    } else if (type === 'error') {
-        notification.style.background = '#ef4444';
-    } else {
-        notification.style.background = '#3b82f6';
+    AppState.userData.name = name;
+    AppState.userData.email = email;
+    AppState.userData.phone = phone;
+    AppState.userData.avatar = name.substring(0, 2).toUpperCase();
+    
+    NotificationSystem.show('Información personal actualizada correctamente', 'success');
+}
+
+function handlePasswordChange(e) {
+    e.preventDefault();
+    const newPassword = document.getElementById('newPassword').value;
+    
+    if (ValidationSystem.validatePassword(newPassword) === 'invalid') {
+        NotificationSystem.show('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
     }
     
-    notification.textContent = message;
-    document.body.appendChild(notification);
+    NotificationSystem.show('Contraseña actualizada correctamente', 'success');
+    e.target.reset();
+}
+
+// Sistema de animaciones
+function setupAnimations() {
+    // Animación de scroll para header
+    const header = document.getElementById('main-header');
+    if (header) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+    }
     
-    // Remover después de 3 segundos
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
+    // Animaciones para elementos al hacer scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'fadeIn 0.6s ease forwards';
+            }
+        });
+    }, observerOptions);
+    
+    // Observar elementos para animaciones
+    document.querySelectorAll('.feature-card, .stat-item, .form-container').forEach(el => {
+        observer.observe(el);
+    });
 }
 
-function logout() {
-    AppState.currentUser = null;
-    showNotification('Sesión cerrada exitosamente', 'info');
-    setTimeout(() => {
-        navigateTo('landing');
-    }, 1000);
+// Validaciones en tiempo real
+function setupRealTimeValidation() {
+    const passwordInput = document.getElementById('newPassword');
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            const strength = ValidationSystem.validatePassword(this.value);
+            const strengthBar = document.getElementById('passwordStrengthBar');
+            if (strengthBar) {
+                strengthBar.className = 'strength-bar ' + strength;
+            }
+        });
+    }
+    
+    // Validación de email en tiempo real
+    const emailInputs = document.querySelectorAll('input[type="email"]');
+    emailInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value && !ValidationSystem.validateEmail(this.value)) {
+                this.classList.add('invalid');
+            } else {
+                this.classList.remove('invalid');
+            }
+        });
+    });
 }
 
-function receivePayment() {
-    const paymentPointer = '$remesapp.example/usuario';
-    prompt('Comparte tu Payment Pointer con el remitente:', paymentPointer);
-}
-
-// Inicializar la aplicación
+// Inicialización mejorada
 document.addEventListener('DOMContentLoaded', function() {
     renderPage();
+    NotificationSystem.render();
+    
+    // Manejar navegación con el botón atrás
+    window.addEventListener('popstate', function(event) {
+        if (event.state) {
+            navigateTo(event.state.page, event.state.params);
+        }
+    });
 });
 
-// Hacer las funciones globales
+// Funciones globales
 window.navigateTo = navigateTo;
-window.logout = logout;
-window.receivePayment = receivePayment;
+window.NotificationSystem = NotificationSystem;
+window.logout = function() {
+    AppState.currentUser = null;
+    NotificationSystem.show('Sesión cerrada correctamente', 'info');
+    navigateTo('landing');
+};
+
+window.receivePayment = function() {
+    navigator.clipboard.writeText(AppState.userData.paymentPointer).then(() => {
+        NotificationSystem.show('Payment Pointer copiado al portapapeles', 'success');
+    });
+};
+
+window.copyToClipboard = function(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        NotificationSystem.show('Copiado al portapapeles', 'success');
+    });
+};
+
+window.scrollToSection = function(sectionId) {
+    const element = document.getElementById(sectionId);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+    }
+};
